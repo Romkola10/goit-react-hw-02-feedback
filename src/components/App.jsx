@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { FeedbackOptions } from "./Feedback/Buttons";
-import { Statistics } from "./Feedback/Statistics";
-import { Notification } from "./Feedback/Notification";
+import { FeedbackOptions } from "./FeedbackOptions/FeedbackOptions";
+import { Statistics } from "./Statistics/Statistics";
+import { Notification } from "./Notifications/Notification";
 
 
 
@@ -15,22 +15,43 @@ class App extends Component {
     good: 0,
     neutral: 0,
     bad: 0,
-    visible: false,
   };
 
-  increment = (event) => {
+  increment = state => {
     this.setState(prevState => ({
-        visible: true,
-        [event.target.name]: prevState[event.target.name] + 1,
+        [state]: prevState[state] + 1,
     }))
   }
+  
+ countTotalFeedback() {
+    return this.state.good + this.state.neutral + this.state.bad;
+  }
+
+
+  countPositiveFeedbackPercentage() {
+    return (this.state.good / this.countTotalFeedback() * 100).toFixed();
+  }
+  
 
   render() {
+    const options = Object.keys(this.state)
+    const { good, neutral, bad } = this.state;
+
     return(
       <div className="div">
-        <FeedbackOptions onIncrement={this.increment} />  
-        {this.state.visible && <Statistics good={this.state.good} neutral={this.state.neutral} bad={this.state.bad} />}
-        {this.state.visible || <Notification />}
+        <FeedbackOptions
+            options={options}
+            increment={this.increment}
+          /> 
+        {this.countTotalFeedback() > 0 ? 
+          (<Statistics 
+            good={good} 
+            neutral={neutral} 
+            bad={bad} 
+            total={this.countTotalFeedback()} 
+            positivePercentage={this.countPositiveFeedbackPercentage()}
+          />) : (<Notification message="There is no feedback" />)
+        }
       </div>
     )
   }
